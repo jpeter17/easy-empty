@@ -19,7 +19,7 @@ import java.util.Objects;
 @PluginDescriptor(
 	name = "Easy Empty",
 	description = "Swap essence pouch left click to Empty when near a runecrafting altar",
-	tags = {"swap","swapper","menu","entry","menu entry swapper", "runecrafting", "pouch", "essence"}
+	tags = {"swap","swapper","menu","entry","menu entry swapper","runecrafting","pouch","essence"}
 )
 public class EasyEmptyPlugin extends Plugin
 {
