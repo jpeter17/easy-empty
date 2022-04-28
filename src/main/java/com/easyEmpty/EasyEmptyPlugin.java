@@ -101,8 +101,6 @@ public class EasyEmptyPlugin extends Plugin
 	@Subscribe
 	public void onClientTick(ClientTick event)
 	{
-
-		log.debug(String.valueOf(InventoryID.INVENTORY));
 		if (client.getGameState() != GameState.LOGGED_IN || client.isMenuOpen() || client.isKeyPressed(KeyCode.KC_SHIFT)
 			|| Arrays.stream(Objects.requireNonNull(client.getItemContainer(InventoryID.INVENTORY)).getItems()).noneMatch(item -> ArrayUtils.contains(pouches, item.getId())))
 		{
