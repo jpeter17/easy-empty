@@ -36,7 +36,9 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.util.Text;
+import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 @Slf4j
@@ -64,6 +66,18 @@ public class EasyEmptyPlugin extends Plugin
 		12875 // Blood
 	};
 
+	int[] pouches = {
+			ItemID.SMALL_POUCH,
+			ItemID.MEDIUM_POUCH,
+			ItemID.LARGE_POUCH,
+			ItemID.GIANT_POUCH,
+			ItemID.COLOSSAL_POUCH,
+			ItemID.MEDIUM_POUCH_5511,
+			ItemID.LARGE_POUCH_5513,
+			ItemID.GIANT_POUCH_5515,
+			ItemID.COLOSSAL_POUCH_26786
+	};
+
 	private static final WorldArea zmi = new WorldArea(new WorldPoint(3050, 5573, 0), 20, 20);
 
 	@Inject
@@ -87,7 +101,10 @@ public class EasyEmptyPlugin extends Plugin
 	@Subscribe
 	public void onClientTick(ClientTick event)
 	{
-		if (client.getGameState() != GameState.LOGGED_IN || client.isMenuOpen() || client.isKeyPressed(KeyCode.KC_SHIFT))
+
+		log.debug(String.valueOf(InventoryID.INVENTORY));
+		if (client.getGameState() != GameState.LOGGED_IN || client.isMenuOpen() || client.isKeyPressed(KeyCode.KC_SHIFT)
+			|| Arrays.stream(Objects.requireNonNull(client.getItemContainer(InventoryID.INVENTORY)).getItems()).noneMatch(item -> ArrayUtils.contains(pouches, item.getId())))
 		{
 			return;
 		}
