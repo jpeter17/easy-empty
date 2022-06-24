@@ -31,4 +31,9 @@ import net.runelite.client.config.ConfigItem;
 @ConfigGroup("easyempty")
 public interface EasyEmptyConfig extends Config
 {
+    @ConfigItem(keyName = "bankFill", name = "Fill from bank", description = "Fill pouches from bank menu")
+    default boolean bankFill()
+    {
+        return true;
+    }
 }

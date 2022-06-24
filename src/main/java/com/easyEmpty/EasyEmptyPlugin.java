@@ -31,6 +31,7 @@ import net.runelite.api.*;
 import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ClientTick;
+import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -101,6 +102,22 @@ public class EasyEmptyPlugin extends Plugin
 	@Subscribe
 	public void onClientTick(ClientTick event)
 	{
+		if (client.getWidget(WidgetInfo.BANK_CONTAINER) != null && config.bankFill()) {
+			MenuEntry[] menuEntries = client.getMenuEntries();
+			for (int i = menuEntries.length - 1; i >= 0; i--) {
+				if (menuEntries[i].getOption().startsWith("Fill")) {
+					MenuEntry entry = menuEntries[i];
+
+					entry.setType(MenuAction.CC_OP);
+					menuEntries[i] = menuEntries[menuEntries.length - 1];
+					menuEntries[menuEntries.length - 1] = entry;
+
+					client.setMenuEntries(menuEntries);
+					break;
+				}
+			}
+		}
+
 		if (client.getGameState() != GameState.LOGGED_IN || client.isMenuOpen() || client.isKeyPressed(KeyCode.KC_SHIFT)
 			|| Arrays.stream(Objects.requireNonNull(client.getItemContainer(InventoryID.INVENTORY)).getItems()).noneMatch(item -> ArrayUtils.contains(pouches, item.getId())))
 		{
@@ -145,6 +162,8 @@ public class EasyEmptyPlugin extends Plugin
 
 			client.setMenuEntries(menuEntries);
 		}
+
+
 	}
 
 	@Provides
