@@ -34,13 +34,13 @@ import net.runelite.api.events.ClientTick;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.util.Text;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 @Slf4j
 @PluginDescriptor(
@@ -81,6 +81,8 @@ public class EasyEmptyPlugin extends Plugin
 
 	private static final WorldArea zmi = new WorldArea(new WorldPoint(3050, 5573, 0), 20, 20);
 
+	boolean bankFill;
+
 	@Inject
 	private Client client;
 
@@ -90,6 +92,7 @@ public class EasyEmptyPlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
+		bankFill = config.bankFill();
 		log.info("Easy Empty  started!");
 	}
 
@@ -102,7 +105,7 @@ public class EasyEmptyPlugin extends Plugin
 	@Subscribe
 	public void onClientTick(ClientTick event)
 	{
-		if (client.getWidget(WidgetInfo.BANK_CONTAINER) != null && config.bankFill()) {
+		if (client.getWidget(WidgetInfo.BANK_CONTAINER) != null && bankFill) {
 			MenuEntry[] menuEntries = client.getMenuEntries();
 			for (int i = menuEntries.length - 1; i >= 0; i--) {
 				if (menuEntries[i].getOption().startsWith("Fill")) {
@@ -119,13 +122,13 @@ public class EasyEmptyPlugin extends Plugin
 		}
 
 		if (client.getGameState() != GameState.LOGGED_IN || client.isMenuOpen() || client.isKeyPressed(KeyCode.KC_SHIFT)
-			|| Arrays.stream(Objects.requireNonNull(client.getItemContainer(InventoryID.INVENTORY)).getItems()).noneMatch(item -> ArrayUtils.contains(pouches, item.getId())))
+			|| Arrays.stream(client.getItemContainer(InventoryID.INVENTORY).getItems()).noneMatch(item -> ArrayUtils.contains(pouches, item.getId())))
 		{
 			return;
 		}
 
 		boolean atAltar = false;
-		WorldPoint playerLoc = Objects.requireNonNull(client.getLocalPlayer()).getWorldLocation();
+		WorldPoint playerLoc = client.getLocalPlayer().getWorldLocation();
 
 		if (zmi.contains2D(playerLoc)) {
 			atAltar = true;
@@ -162,8 +165,12 @@ public class EasyEmptyPlugin extends Plugin
 
 			client.setMenuEntries(menuEntries);
 		}
+	}
 
-
+	@Subscribe
+	public void onConfigChanged(ConfigChanged event)
+	{
+		bankFill = Boolean.parseBoolean(event.getNewValue());
 	}
 
 	@Provides
