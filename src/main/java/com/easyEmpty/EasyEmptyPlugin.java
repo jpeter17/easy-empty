@@ -170,7 +170,9 @@ public class EasyEmptyPlugin extends Plugin
 	@Subscribe
 	public void onConfigChanged(ConfigChanged event)
 	{
-		bankFill = Boolean.parseBoolean(event.getNewValue());
+		if (event.getGroup().equals("easyempty")) {
+			bankFill = Boolean.parseBoolean(event.getNewValue());
+		}
 	}
 
 	@Provides
