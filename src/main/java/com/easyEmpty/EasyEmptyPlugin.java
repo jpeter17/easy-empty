@@ -111,7 +111,7 @@ public class EasyEmptyPlugin extends Plugin
 			MenuEntry[] menuEntries = client.getMenuEntries();
 			for (int i = menuEntries.length - 1; i >= 0; i--) {
 				Widget widget = menuEntries[i].getWidget();
-				if (widget != null &&
+				if (widget != null && menuEntries[i].getType() == MenuAction.CC_OP_LOW_PRIORITY &&
 					((bankFill && menuEntries[i].getOption().startsWith("Fill") && ArrayUtils.contains(pouches, widget.getItemId())) ||
 					(drinkStam && menuEntries[i].getOption().startsWith("Drink") && widget.getItemId() == ItemID.STAMINA_POTION1) ||
 					(equipNeck && menuEntries[i].getOption().startsWith("Wear") && widget.getItemId() == ItemID.BINDING_NECKLACE))) {
