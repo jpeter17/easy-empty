@@ -80,7 +80,7 @@ public class EasyEmptyPlugin extends Plugin
 
 	private static final WorldArea zmi = new WorldArea(new WorldPoint(3050, 5573, 0), 20, 20);
 
-	boolean bankFill;
+	boolean bankFill, drinkStam, equipNeck;
 
 	@Inject
 	private Client client;
@@ -92,6 +92,8 @@ public class EasyEmptyPlugin extends Plugin
 	protected void startUp()
 	{
 		bankFill = config.bankFill();
+		drinkStam = config.drinkStam();
+		equipNeck = config.equipNeck();
 		log.info("Easy Empty  started!");
 	}
 
@@ -104,12 +106,14 @@ public class EasyEmptyPlugin extends Plugin
 	@Subscribe
 	public void onClientTick(ClientTick event)
 	{
-		if (client.getWidget(WidgetInfo.BANK_CONTAINER) != null && bankFill) {
+		if (client.getWidget(WidgetInfo.BANK_CONTAINER) != null) {
 			MenuEntry[] menuEntries = client.getMenuEntries();
 			for (int i = menuEntries.length - 1; i >= 0; i--) {
 				Widget widget = menuEntries[i].getWidget();
-				if (menuEntries[i].getOption().startsWith("Fill") && widget != null &&
-						ArrayUtils.contains(pouches, widget.getItemId())) {
+				if (widget != null &&
+					((bankFill && menuEntries[i].getOption().startsWith("Fill") && ArrayUtils.contains(pouches, widget.getItemId())) ||
+					(drinkStam && menuEntries[i].getOption().startsWith("Drink") && widget.getItemId() == ItemID.STAMINA_POTION1) ||
+					(equipNeck && menuEntries[i].getOption().startsWith("Wear") && widget.getItemId() == ItemID.BINDING_NECKLACE))) {
 					MenuEntry entry = menuEntries[i];
 
 					entry.setType(MenuAction.CC_OP);
@@ -173,7 +177,13 @@ public class EasyEmptyPlugin extends Plugin
 	public void onConfigChanged(ConfigChanged event)
 	{
 		if (event.getGroup().equals("easyempty")) {
-			bankFill = config.bankFill();
+			if (event.getKey().equals("bankFill")) {
+				bankFill = config.bankFill();
+			} else if (event.getKey().equals("equipNeck")) {
+				equipNeck = config.equipNeck();
+			} else if (event.getKey().equals("drinkStam")) {
+				drinkStam = config.drinkStam();
+			}
 		}
 	}
 
