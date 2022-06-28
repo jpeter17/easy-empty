@@ -80,7 +80,7 @@ public class EasyEmptyPlugin extends Plugin
 
 	private static final WorldArea zmi = new WorldArea(new WorldPoint(3050, 5573, 0), 20, 20);
 
-	boolean bankFill, drinkStam, equipNeck;
+	boolean bankFill, drinkStam, equipNeck, emptyPouches;
 
 	@Inject
 	private Client client;
@@ -94,6 +94,7 @@ public class EasyEmptyPlugin extends Plugin
 		bankFill = config.bankFill();
 		drinkStam = config.drinkStam();
 		equipNeck = config.equipNeck();
+		emptyPouches = config.emptyPouches();
 		log.info("Easy Empty  started!");
 	}
 
@@ -148,7 +149,7 @@ public class EasyEmptyPlugin extends Plugin
 
 		if (atAltar) {
 			MenuEntry[] menuEntries = client.getMenuEntries();
-			if (ArrayUtils.contains(pouches, menuEntries[menuEntries.length -1].getItemId())) {
+			if (emptyPouches && ArrayUtils.contains(pouches, menuEntries[menuEntries.length -1].getItemId())) {
 				int emptyIdx = -1;
 				int topIdx = menuEntries.length - 1;
 				for (int i = 0; i < topIdx; i++) {
@@ -177,12 +178,15 @@ public class EasyEmptyPlugin extends Plugin
 	public void onConfigChanged(ConfigChanged event)
 	{
 		if (event.getGroup().equals("easyempty")) {
-			if (event.getKey().equals("bankFill")) {
-				bankFill = config.bankFill();
-			} else if (event.getKey().equals("equipNeck")) {
-				equipNeck = config.equipNeck();
-			} else if (event.getKey().equals("drinkStam")) {
-				drinkStam = config.drinkStam();
+			switch (event.getKey()) {
+				case "bankFill":	bankFill = config.bankFill();
+									break;
+				case "equipNeck":	equipNeck = config.equipNeck();
+									break;
+				case "drinkStam":	drinkStam = config.drinkStam();
+									break;
+				case "emptyPouches":emptyPouches = config.emptyPouches();
+									break;
 			}
 		}
 	}

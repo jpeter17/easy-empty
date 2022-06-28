@@ -31,20 +31,24 @@ import net.runelite.client.config.ConfigItem;
 @ConfigGroup("easyempty")
 public interface EasyEmptyConfig extends Config
 {
-    @ConfigItem(keyName = "bankFill", name = "Fill pouches from bank", description = "Fill pouches from bank menu")
+    @ConfigItem(keyName = "bankFill", name = "Fill pouches from bank", description = "Left-click fill pouches from bank menu")
     default boolean bankFill()
-    {
-        return true;
-    }
+    { return true; }
 
-    @ConfigItem(keyName = "drinkStam", name = "Drink staminas from bank", description = "Drink staminas from bank")
+    @ConfigItem(keyName = "drinkStam", name = "Drink staminas from bank", description = "Left-click drink staminas from bank")
     default boolean drinkStam()
     {
         return true;
     }
 
-    @ConfigItem(keyName = "equipNeck", name = "Equip Binding Necklaces from bank", description = "Equip Binding Necklaces from bank")
+    @ConfigItem(keyName = "equipNeck", name = "Equip Binding Necklaces from bank", description = "Left-click equip Binding Necklaces from bank")
     default boolean equipNeck()
+    {
+        return true;
+    }
+
+    @ConfigItem(keyName = "emptyPouches", name = "Empty pouches near altar", description = "Left-click empty pouches near altar")
+    default boolean emptyPouches()
     {
         return true;
     }
