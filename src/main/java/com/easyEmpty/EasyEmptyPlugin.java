@@ -43,9 +43,9 @@ import org.apache.commons.lang3.ArrayUtils;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Easy Empty",
-	description = "Swap essence pouch left click to Empty when near a runecrafting altar",
-	tags = {"swap","swapper","menu","entry","menu entry swapper","runecrafting","pouch","essence"}
+	name = "Runecrafting Utilities",
+	description = "Provides various menu swaps to improve runecrafting",
+	tags = {"swap","swapper","menu","entry","menu entry swapper","runecrafting","pouch","essence","easy","empty"}
 )
 public class EasyEmptyPlugin extends Plugin
 {
