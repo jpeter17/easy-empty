@@ -1,5 +1,8 @@
-# Easy Empty - v1.2
-Modifies left click behavior while within runecrafting altars/banks to allow easy emptying/filling of essence pouches
+# Runecrafting Utilities - v1.3.0
+Provides various menu swaps to improve runecrafting
 
 ## Config
-* Option to set left-click fill while within bank menu
+* Empty pouches near altars
+* Fill pouches within bank menu
+* Wear Binding Necklace from bank menu
+* Drink Stamina Potion(1) from bank menu
