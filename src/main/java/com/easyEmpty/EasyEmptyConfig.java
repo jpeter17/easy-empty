@@ -32,8 +32,7 @@ import net.runelite.client.config.ConfigItem;
 public interface EasyEmptyConfig extends Config
 {
     @ConfigItem(keyName = "bankFill", name = "Fill pouches from bank", description = "Left-click fill pouches from bank menu")
-    default boolean bankFill()
-    { return true; }
+    default boolean bankFill() { return true; }
 
     @ConfigItem(keyName = "drinkStam", name = "Drink staminas from bank", description = "Left-click drink staminas from bank")
     default boolean drinkStam()
