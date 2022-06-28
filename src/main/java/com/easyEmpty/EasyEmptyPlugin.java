@@ -31,6 +31,7 @@ import net.runelite.api.*;
 import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ClientTick;
+import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -39,8 +40,6 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.util.Text;
 import org.apache.commons.lang3.ArrayUtils;
-
-import java.util.Arrays;
 
 @Slf4j
 @PluginDescriptor(
@@ -108,7 +107,9 @@ public class EasyEmptyPlugin extends Plugin
 		if (client.getWidget(WidgetInfo.BANK_CONTAINER) != null && bankFill) {
 			MenuEntry[] menuEntries = client.getMenuEntries();
 			for (int i = menuEntries.length - 1; i >= 0; i--) {
-				if (menuEntries[i].getOption().startsWith("Fill")) {
+				Widget widget = menuEntries[i].getWidget();
+				if (menuEntries[i].getOption().startsWith("Fill") && widget != null &&
+						ArrayUtils.contains(pouches, widget.getItemId())) {
 					MenuEntry entry = menuEntries[i];
 
 					entry.setType(MenuAction.CC_OP);
@@ -121,8 +122,7 @@ public class EasyEmptyPlugin extends Plugin
 			}
 		}
 
-		if (client.getGameState() != GameState.LOGGED_IN || client.isMenuOpen() || client.isKeyPressed(KeyCode.KC_SHIFT)
-			|| Arrays.stream(client.getItemContainer(InventoryID.INVENTORY).getItems()).noneMatch(item -> ArrayUtils.contains(pouches, item.getId())))
+		if (client.getGameState() != GameState.LOGGED_IN || client.isMenuOpen() || client.isKeyPressed(KeyCode.KC_SHIFT))
 		{
 			return;
 		}
@@ -144,26 +144,28 @@ public class EasyEmptyPlugin extends Plugin
 
 		if (atAltar) {
 			MenuEntry[] menuEntries = client.getMenuEntries();
-			int emptyIdx = -1;
-			int topIdx = menuEntries.length - 1;
-			for (int i = 0; i < topIdx; i++) {
+			if (ArrayUtils.contains(pouches, menuEntries[menuEntries.length -1].getItemId())) {
+				int emptyIdx = -1;
+				int topIdx = menuEntries.length - 1;
+				for (int i = 0; i < topIdx; i++) {
 
-				if (Text.removeTags(menuEntries[i].getOption()).equals("Empty")) {
-					emptyIdx = i;
-					break;
+					if (Text.removeTags(menuEntries[i].getOption()).equals("Empty")) {
+						emptyIdx = i;
+						break;
+					}
 				}
+				if (emptyIdx == -1) {
+					return;
+				}
+
+				MenuEntry entry1 = menuEntries[emptyIdx];
+				MenuEntry entry2 = menuEntries[topIdx];
+
+				menuEntries[emptyIdx] = entry2;
+				menuEntries[topIdx] = entry1;
+
+				client.setMenuEntries(menuEntries);
 			}
-			if (emptyIdx == -1) {
-				return;
-			}
-
-			MenuEntry entry1 = menuEntries[emptyIdx];
-			MenuEntry entry2 = menuEntries[topIdx];
-
-			menuEntries[emptyIdx] = entry2;
-			menuEntries[topIdx] = entry1;
-
-			client.setMenuEntries(menuEntries);
 		}
 	}
 
@@ -171,7 +173,7 @@ public class EasyEmptyPlugin extends Plugin
 	public void onConfigChanged(ConfigChanged event)
 	{
 		if (event.getGroup().equals("easyempty")) {
-			bankFill = Boolean.parseBoolean(event.getNewValue());
+			bankFill = config.bankFill();
 		}
 	}
 
