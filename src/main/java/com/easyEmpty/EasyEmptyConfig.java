@@ -54,4 +54,10 @@ public interface EasyEmptyConfig extends Config
     {
         return true;
     }
+    @ConfigItem(keyName = "swapTali", name = "Talisman swaps", description = "withdraw-2/3 from bank menu", position = 5)
+    default boolean swapTali()
+    {
+        return true;
+    }
+    
 }
