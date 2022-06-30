@@ -38,7 +38,8 @@ public interface EasyEmptyConfig extends Config
     }
 
     @ConfigItem(keyName = "bankFill", name = "Fill pouches from bank", description = "Left-click fill pouches from bank menu", position = 2)
-    default boolean bankFill() {
+    default boolean bankFill()
+    {
         return true;
     }
 
