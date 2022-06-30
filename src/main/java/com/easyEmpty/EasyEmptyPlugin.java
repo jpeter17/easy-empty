@@ -80,7 +80,7 @@ public class EasyEmptyPlugin extends Plugin
 
 	private static final WorldArea zmi = new WorldArea(new WorldPoint(3050, 5573, 0), 20, 20);
 
-	boolean bankFill, drinkStam, equipNeck, emptyPouches;
+	boolean bankFill, swapStam, swapNeck, emptyPouches;
 
 	@Inject
 	private Client client;
@@ -92,8 +92,8 @@ public class EasyEmptyPlugin extends Plugin
 	protected void startUp()
 	{
 		bankFill = config.bankFill();
-		drinkStam = config.drinkStam();
-		equipNeck = config.equipNeck();
+		swapStam = config.swapStam();
+		swapNeck = config.swapNeck();
 		emptyPouches = config.emptyPouches();
 		log.info("Easy Empty  started!");
 	}
@@ -107,14 +107,22 @@ public class EasyEmptyPlugin extends Plugin
 	@Subscribe
 	public void onClientTick(ClientTick event)
 	{
+		if (client.getGameState() != GameState.LOGGED_IN || client.isMenuOpen() || client.isKeyPressed(KeyCode.KC_SHIFT))
+		{
+			return;
+		}
+
 		if (client.getWidget(WidgetInfo.BANK_CONTAINER) != null) {
 			MenuEntry[] menuEntries = client.getMenuEntries();
 			for (int i = menuEntries.length - 1; i >= 0; i--) {
 				Widget widget = menuEntries[i].getWidget();
-				if (widget != null && menuEntries[i].getType() == MenuAction.CC_OP_LOW_PRIORITY &&
-					((bankFill && menuEntries[i].getOption().startsWith("Fill") && ArrayUtils.contains(pouches, widget.getItemId())) ||
-					(drinkStam && menuEntries[i].getOption().startsWith("Drink") && widget.getItemId() == ItemID.STAMINA_POTION1) ||
-					(equipNeck && menuEntries[i].getOption().startsWith("Wear") && widget.getItemId() == ItemID.BINDING_NECKLACE))) {
+				MenuAction entryType = menuEntries[i].getType();
+				String entryOption = menuEntries[i].getOption();
+
+				if (widget != null && (entryType == MenuAction.CC_OP_LOW_PRIORITY || entryType == MenuAction.CC_OP) &&
+					((bankFill && entryOption.startsWith("Fill") && ArrayUtils.contains(pouches, widget.getItemId())) ||
+					(swapStam && entryOption.matches("Drink|Withdraw-1") && widget.getItemId() == ItemID.STAMINA_POTION1) ||
+					(swapNeck && entryOption.matches("Wear|Withdraw-1") && widget.getItemId() == ItemID.BINDING_NECKLACE))) {
 					MenuEntry entry = menuEntries[i];
 
 					entry.setType(MenuAction.CC_OP);
@@ -125,11 +133,6 @@ public class EasyEmptyPlugin extends Plugin
 					break;
 				}
 			}
-		}
-
-		if (client.getGameState() != GameState.LOGGED_IN || client.isMenuOpen() || client.isKeyPressed(KeyCode.KC_SHIFT))
-		{
-			return;
 		}
 
 		boolean atAltar = false;
@@ -181,9 +184,9 @@ public class EasyEmptyPlugin extends Plugin
 			switch (event.getKey()) {
 				case "bankFill":	bankFill = config.bankFill();
 									break;
-				case "equipNeck":	equipNeck = config.equipNeck();
+				case "swapNeck":	swapNeck = config.swapNeck();
 									break;
-				case "drinkStam":	drinkStam = config.drinkStam();
+				case "swapStam":	swapStam = config.swapStam();
 									break;
 				case "emptyPouches":emptyPouches = config.emptyPouches();
 									break;

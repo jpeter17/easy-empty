@@ -31,23 +31,25 @@ import net.runelite.client.config.ConfigItem;
 @ConfigGroup("easyempty")
 public interface EasyEmptyConfig extends Config
 {
-    @ConfigItem(keyName = "bankFill", name = "Fill pouches from bank", description = "Left-click fill pouches from bank menu")
-    default boolean bankFill() { return true; }
-
-    @ConfigItem(keyName = "drinkStam", name = "Drink staminas from bank", description = "Left-click drink staminas from bank")
-    default boolean drinkStam()
-    {
-        return true;
-    }
-
-    @ConfigItem(keyName = "equipNeck", name = "Equip Binding Necklaces from bank", description = "Left-click equip Binding Necklaces from bank")
-    default boolean equipNeck()
-    {
-        return true;
-    }
-
-    @ConfigItem(keyName = "emptyPouches", name = "Empty pouches near altar", description = "Left-click empty pouches near altar")
+    @ConfigItem(keyName = "emptyPouches", name = "Empty pouches near altar", description = "Left-click empty pouches near altar", position = 1)
     default boolean emptyPouches()
+    {
+        return true;
+    }
+
+    @ConfigItem(keyName = "bankFill", name = "Fill pouches from bank", description = "Left-click fill pouches from bank menu", position = 2)
+    default boolean bankFill() {
+        return true;
+    }
+
+    @ConfigItem(keyName = "swapStam", name = "Stamina Potion(1) swaps", description = "Left-click drink/withdraw-1 from bank menu", position = 3)
+    default boolean swapStam()
+    {
+        return true;
+    }
+
+    @ConfigItem(keyName = "swapNeck", name = "Binding Necklace swaps", description = "Left-click wear/withdraw-1 from bank menu", position = 4)
+    default boolean swapNeck()
     {
         return true;
     }
