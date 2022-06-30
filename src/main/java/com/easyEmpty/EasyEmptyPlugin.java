@@ -80,7 +80,7 @@ public class EasyEmptyPlugin extends Plugin
 
 	private static final WorldArea zmi = new WorldArea(new WorldPoint(3050, 5573, 0), 20, 20);
 
-	boolean bankFill, swapStam, swapNeck, emptyPouches;
+	boolean bankFill, swapStam, swapNeck, emptyPouches, swapTali;
 
 	@Inject
 	private Client client;
@@ -94,6 +94,7 @@ public class EasyEmptyPlugin extends Plugin
 		bankFill = config.bankFill();
 		swapStam = config.swapStam();
 		swapNeck = config.swapNeck();
+		swapTali = config.swapTali();
 		emptyPouches = config.emptyPouches();
 		log.info("Easy Empty  started!");
 	}
@@ -122,6 +123,10 @@ public class EasyEmptyPlugin extends Plugin
 				if (widget != null && (entryType == MenuAction.CC_OP_LOW_PRIORITY || entryType == MenuAction.CC_OP) &&
 					((bankFill && entryOption.startsWith("Fill") && ArrayUtils.contains(pouches, widget.getItemId())) ||
 					(swapStam && entryOption.matches("Drink|Withdraw-1") && widget.getItemId() == ItemID.STAMINA_POTION1) ||
+					(swapTali && entryOption.matches("Withdraw-2") && widget.getItemId() == ItemID.EARTH_TALISMAN) ||
+					(swapTali && entryOption.matches("Withdraw-3") && widget.getItemId() == ItemID.EARTH_TALISMAN) ||
+					(swapTali && entryOption.matches("Withdraw-2") && widget.getItemId() == ItemID.WATER_TALISMAN) ||
+					(swapTali && entryOption.matches("Withdraw-3") && widget.getItemId() == ItemID.WATER_TALISMAN) ||
 					(swapNeck && entryOption.matches("Wear|Withdraw-1") && widget.getItemId() == ItemID.BINDING_NECKLACE))) {
 					MenuEntry entry = menuEntries[i];
 
@@ -188,7 +193,9 @@ public class EasyEmptyPlugin extends Plugin
 									break;
 				case "swapStam":	swapStam = config.swapStam();
 									break;
-				case "emptyPouches":emptyPouches = config.emptyPouches();
+				case "emptyPouches":	emptyPouches = config.emptyPouches();
+									break;
+				case "swapTali":	emptyPouches = config.swapTali();
 									break;
 			}
 		}
