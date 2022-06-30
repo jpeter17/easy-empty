@@ -1,4 +1,4 @@
-# Runecrafting Utilities - v1.3.0
+# Runecrafting Utilities - v1.3.1
 Provides various menu swaps to improve runecrafting
 
 ## Config
