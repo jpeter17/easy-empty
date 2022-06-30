@@ -94,8 +94,8 @@ public class EasyEmptyPlugin extends Plugin
 		bankFill = config.bankFill();
 		swapStam = config.swapStam();
 		swapNeck = config.swapNeck();
-		emptyPouches = config.emptyPouches();
 		swapTali = config.swapTali();
+		emptyPouches = config.emptyPouches();
 		log.info("Easy Empty  started!");
 	}
 
