@@ -80,7 +80,7 @@ public class EasyEmptyPlugin extends Plugin
 
 	private static final WorldArea zmi = new WorldArea(new WorldPoint(3050, 5573, 0), 20, 20);
 
-	boolean bankFill, swapStam, swapNeck, emptyPouches;
+	boolean bankFill, swapStam, swapNeck, emptyPouches, swapTali;
 
 	@Inject
 	private Client client;
@@ -95,6 +95,7 @@ public class EasyEmptyPlugin extends Plugin
 		swapStam = config.swapStam();
 		swapNeck = config.swapNeck();
 		emptyPouches = config.emptyPouches();
+		swapTali = config.swapTali();
 		log.info("Easy Empty  started!");
 	}
 
