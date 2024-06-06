@@ -63,7 +63,12 @@ public class EasyEmptyPlugin extends Plugin
 		8779,  // Death
 		9291, // Wrath
 		8508, // Astral
-		12875 // Blood
+		12875, // Blood
+		5681, // The Teomat
+		6703, // Outer Fortis
+		6704, // Civitas Illa Fortis
+		6193, // Ortus Farm
+		6957 // Stonecutter Outpost
 	};
 
 	int[] pouches = {
