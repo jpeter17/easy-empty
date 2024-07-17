@@ -92,6 +92,7 @@ public class EasyEmptyPlugin extends Plugin
 	protected void startUp()
 	{
 		bankFill = config.bankFill();
+		hideDeposit = config.hideDeposit();
 		swapStam = config.swapStam();
 		swapNeck = config.swapNeck();
 		emptyPouches = config.emptyPouches();
@@ -119,16 +120,18 @@ public class EasyEmptyPlugin extends Plugin
 				MenuAction entryType = menuEntries[i].getType();
 				String entryOption = menuEntries[i].getOption();
 
+				
 				if (widget != null && (entryType == MenuAction.CC_OP_LOW_PRIORITY || entryType == MenuAction.CC_OP) &&
-					((bankFill && entryOption.startsWith("Fill") && ArrayUtils.contains(pouches, widget.getItemId())) ||
+					((hideDeposit && entryOption.startsWith("Empty") && ArrayUtils.contains(pouches, widget.getItemId())) || 
+					(bankFill && entryOption.startsWith("Fill") && ArrayUtils.contains(pouches, widget.getItemId())) ||
 					(swapStam && entryOption.matches("Drink|Withdraw-1") && widget.getItemId() == ItemID.STAMINA_POTION1) ||
 					(swapNeck && entryOption.matches("Wear|Withdraw-1") && widget.getItemId() == ItemID.BINDING_NECKLACE))) {
 					MenuEntry entry = menuEntries[i];
-
+				
 					entry.setType(MenuAction.CC_OP);
 					menuEntries[i] = menuEntries[menuEntries.length - 1];
 					menuEntries[menuEntries.length - 1] = entry;
-
+				
 					client.setMenuEntries(menuEntries);
 					break;
 				}
@@ -184,11 +187,13 @@ public class EasyEmptyPlugin extends Plugin
 			switch (event.getKey()) {
 				case "bankFill":	bankFill = config.bankFill();
 									break;
+				case "hideDeposit":	hideDeposit = config.hideDeposit();
+									break;
 				case "swapNeck":	swapNeck = config.swapNeck();
 									break;
 				case "swapStam":	swapStam = config.swapStam();
 									break;
-				case "emptyPouches":emptyPouches = config.emptyPouches();
+				case "emptyPouches":	emptyPouches = config.emptyPouches();
 									break;
 			}
 		}

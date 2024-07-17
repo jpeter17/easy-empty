@@ -43,13 +43,19 @@ public interface EasyEmptyConfig extends Config
         return true;
     }
 
-    @ConfigItem(keyName = "swapStam", name = "Stamina Potion(1) swaps", description = "Left-click drink/withdraw-1 from bank menu", position = 3)
+    @ConfigItem(keyName = "hideDeposit", name = "Hide deposit once pouches are full", description = "Replaces the deposit option with 'Empty' when pouches are full", position = 3)
+    default boolean bankFill()
+    {
+        return true;
+    }
+
+    @ConfigItem(keyName = "swapStam", name = "Stamina Potion(1) swaps", description = "Left-click drink/withdraw-1 from bank menu", position = 4)
     default boolean swapStam()
     {
         return true;
     }
 
-    @ConfigItem(keyName = "swapNeck", name = "Binding Necklace swaps", description = "Left-click wear/withdraw-1 from bank menu", position = 4)
+    @ConfigItem(keyName = "swapNeck", name = "Binding Necklace swaps", description = "Left-click wear/withdraw-1 from bank menu", position = 5)
     default boolean swapNeck()
     {
         return true;
