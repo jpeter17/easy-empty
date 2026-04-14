@@ -25,12 +25,12 @@
 package com.easyEmpty;
 
 import com.google.inject.Provides;
-import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ClientTick;
+import net.runelite.api.events.PostMenuSort;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
@@ -40,6 +40,8 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.util.Text;
 import org.apache.commons.lang3.ArrayUtils;
+
+import javax.inject.Inject;
 
 @Slf4j
 @PluginDescriptor(
@@ -80,7 +82,8 @@ public class EasyEmptyPlugin extends Plugin
 
 	private static final WorldArea zmi = new WorldArea(new WorldPoint(3050, 5573, 0), 20, 20);
 
-	boolean bankFill, swapStam, swapNeck, emptyPouches;
+	boolean bankFill, swapStam, swapNeck, emptyPouches, fillPouches;
+	EasyEmptyConfig.ShiftOption emptyPouchesShift, fillPouchesShift;
 
 	@Inject
 	private Client client;
@@ -95,6 +98,9 @@ public class EasyEmptyPlugin extends Plugin
 		swapStam = config.swapStam();
 		swapNeck = config.swapNeck();
 		emptyPouches = config.emptyPouches();
+		emptyPouchesShift = config.emptyPouchesShift();
+		fillPouches = config.fillPouches();
+		fillPouchesShift = config.fillPouchesShift();
 		log.info("Easy Empty  started!");
 	}
 
@@ -103,95 +109,183 @@ public class EasyEmptyPlugin extends Plugin
 	{
 		log.info("Easy Empty  stopped!");
 	}
-
-	@Subscribe
-	public void onClientTick(ClientTick event)
-	{
-		if (client.getGameState() != GameState.LOGGED_IN || client.isMenuOpen() || client.isKeyPressed(KeyCode.KC_SHIFT))
-		{
+	// Run after built-in menu swaps
+	@Subscribe(priority=-1)
+	public void onClientTick(ClientTick event) {
+		if (client.getGameState() != GameState.LOGGED_IN) {
 			return;
 		}
+		updateBank();
+		// We call this during game ticks also to avoid flickering from menu entry swapper
+		// Specifically:
+		// 1) At an altar
+		// 2) Mouse hovering over a pouch
+		// 3) Essence in inventory
+		// 4) Shift-click configured for Fill or Empty
+		// Pressing shift causes a staggered update
+		updatePouch();
+	}
 
-		if (client.getWidget(WidgetInfo.BANK_CONTAINER) != null) {
-			MenuEntry[] menuEntries = client.getMenuEntries();
-			for (int i = menuEntries.length - 1; i >= 0; i--) {
-				Widget widget = menuEntries[i].getWidget();
-				MenuAction entryType = menuEntries[i].getType();
-				String entryOption = menuEntries[i].getOption();
-
-				if (widget != null && (entryType == MenuAction.CC_OP_LOW_PRIORITY || entryType == MenuAction.CC_OP) &&
-					((bankFill && entryOption.startsWith("Fill") && ArrayUtils.contains(pouches, widget.getItemId())) ||
-					(swapStam && entryOption.matches("Drink|Withdraw-1") && widget.getItemId() == ItemID.STAMINA_POTION1) ||
-					(swapNeck && entryOption.matches("Wear|Withdraw-1") && widget.getItemId() == ItemID.BINDING_NECKLACE))) {
-					MenuEntry entry = menuEntries[i];
-
-					entry.setType(MenuAction.CC_OP);
-					menuEntries[i] = menuEntries[menuEntries.length - 1];
-					menuEntries[menuEntries.length - 1] = entry;
-
-					client.setMenuEntries(menuEntries);
-					break;
-				}
-			}
-		}
-
-		boolean atAltar = false;
-		WorldPoint playerLoc = client.getLocalPlayer().getWorldLocation();
-
-		if (zmi.contains2D(playerLoc)) {
-			atAltar = true;
-		}
-		else {
-			for (int altarRegion : altars) {
-				if (altarRegion == playerLoc.getRegionID()) {
-					atAltar = true;
-					break;
-				}
-			}
-		}
-
-		if (atAltar) {
-			MenuEntry[] menuEntries = client.getMenuEntries();
-			if (emptyPouches && ArrayUtils.contains(pouches, menuEntries[menuEntries.length -1].getItemId())) {
-				int emptyIdx = -1;
-				int topIdx = menuEntries.length - 1;
-				for (int i = 0; i < topIdx; i++) {
-
-					if (Text.removeTags(menuEntries[i].getOption()).equals("Empty")) {
-						emptyIdx = i;
-						break;
-					}
-				}
-				if (emptyIdx == -1) {
-					return;
-				}
-
-				MenuEntry entry1 = menuEntries[emptyIdx];
-				MenuEntry entry2 = menuEntries[topIdx];
-
-				menuEntries[emptyIdx] = entry2;
-				menuEntries[topIdx] = entry1;
-
-				client.setMenuEntries(menuEntries);
-			}
-		}
+	// Run after built-in menu swaps, so we can detect shift-click swaps
+	@Subscribe(priority=-1)
+	public void onPostMenuSort(PostMenuSort event)
+	{
+		updatePouch();
 	}
 
 	@Subscribe
 	public void onConfigChanged(ConfigChanged event)
 	{
+
 		if (event.getGroup().equals("easyempty")) {
 			switch (event.getKey()) {
-				case "bankFill":	bankFill = config.bankFill();
-									break;
-				case "swapNeck":	swapNeck = config.swapNeck();
-									break;
-				case "swapStam":	swapStam = config.swapStam();
-									break;
-				case "emptyPouches":emptyPouches = config.emptyPouches();
-									break;
+				case "bankFill":			bankFill = config.bankFill();
+					break;
+				case "swapNeck":			swapNeck = config.swapNeck();
+					break;
+				case "swapStam":			swapStam = config.swapStam();
+					break;
+				case "emptyPouches":		emptyPouches = config.emptyPouches();
+					break;
+				case "emptyPouchesShift": 	emptyPouchesShift = config.emptyPouchesShift();
+					break;
+				case "fillPouches": 		fillPouches = config.fillPouches();
+					break;
+				case "fillPouchesShift": 	fillPouchesShift = config.fillPouchesShift();
+					break;
 			}
 		}
+	}
+
+	protected void updateBank() {
+		if (client.isMenuOpen() || client.isKeyPressed(KeyCode.KC_SHIFT)
+				|| client.getWidget(WidgetInfo.BANK_CONTAINER) == null) {
+			return;
+		}
+		MenuEntry[] menuEntries = client.getMenuEntries();
+		for (int i = menuEntries.length - 1; i >= 0; i--) {
+			Widget widget = menuEntries[i].getWidget();
+			MenuAction entryType = menuEntries[i].getType();
+			String entryOption = menuEntries[i].getOption();
+
+			if (widget != null && (entryType == MenuAction.CC_OP_LOW_PRIORITY || entryType == MenuAction.CC_OP) &&
+					((bankFill && entryOption.startsWith("Fill") && ArrayUtils.contains(pouches, widget.getItemId())) ||
+							(swapStam && entryOption.matches("Drink|Withdraw-1") && widget.getItemId() == ItemID.STAMINA_POTION1) ||
+							(swapNeck && entryOption.matches("Wear|Withdraw-1") && widget.getItemId() == ItemID.BINDING_NECKLACE))) {
+				MenuEntry entry = menuEntries[i];
+
+				entry.setType(MenuAction.CC_OP);
+				menuEntries[i] = menuEntries[menuEntries.length - 1];
+				menuEntries[menuEntries.length - 1] = entry;
+
+				client.setMenuEntries(menuEntries);
+				break;
+			}
+		}
+	}
+
+	protected boolean atAltar()
+	{
+		Player player = client.getLocalPlayer();
+		if (player == null) return false;
+		WorldPoint playerLoc = player.getWorldLocation();
+
+		for (int altarRegion : altars) {
+			if (altarRegion == playerLoc.getRegionID()) {
+				return true;
+			}
+		}
+
+		return zmi.contains2D(playerLoc);
+	}
+
+	protected void updatePouch()
+	{
+		if (atAltar()) {
+			if (emptyPouches) {
+				updatePouch("Empty", emptyPouchesShift);
+			}
+		} else {
+			if(fillPouches) {
+				updatePouch("Fill", fillPouchesShift);
+			}
+		}
+	}
+
+	protected String flipFillEmpty(String currentLeftClick)
+	{
+		if (currentLeftClick.equals("Empty")) return "Fill";
+		if (currentLeftClick.equals("Fill")) return "Empty";
+		// Leave other values unmodified
+		return currentLeftClick;
+	}
+
+	@SuppressWarnings("ReassignedVariable")
+    protected void updatePouch(String desiredLeftClick, EasyEmptyConfig.ShiftOption shiftOption)
+	{
+		if (client.isMenuOpen()) {
+			return;
+		}
+
+		boolean doInvert = false;
+		if (client.isKeyPressed(KeyCode.KC_SHIFT)) {
+			if (shiftOption == EasyEmptyConfig.ShiftOption.UNMODIFIED) {
+				return;
+			}
+			if (shiftOption == EasyEmptyConfig.ShiftOption.FILL) {
+				desiredLeftClick = "Fill";
+			}
+			if (shiftOption == EasyEmptyConfig.ShiftOption.EMPTY) {
+				desiredLeftClick = "Empty";
+			}
+			if (shiftOption == EasyEmptyConfig.ShiftOption.DYNAMIC) {
+				// If the current option is Fill or Empty, then we flip it.
+				// Otherwise, keep it the same
+				doInvert = true;
+			}
+		}
+
+		MenuEntry[] menuEntries = client.getMenuEntries();
+		int topIdx = menuEntries.length - 1;
+		if (!ArrayUtils.contains(pouches, menuEntries[topIdx].getItemId())) {
+			return;
+		}
+
+		if (doInvert) {
+			String currentLeftClick = Text.removeTags(menuEntries[topIdx].getOption());
+
+			desiredLeftClick = flipFillEmpty(currentLeftClick);
+			if (desiredLeftClick.equals(currentLeftClick)) return;
+		}
+
+		setLeftClick(menuEntries, desiredLeftClick);
+	}
+
+	// Takes in menuEntries to avoid multiple get calls
+	protected void setLeftClick(MenuEntry[] menuEntries, String desiredLeftClick)
+	{
+		final int topIdx = menuEntries.length - 1;
+		int originalIdx = -1;
+		for (int i = 0; i < topIdx; i++) {
+			if (Text.removeTags(menuEntries[i].getOption()).equals(desiredLeftClick)) {
+				originalIdx = i;
+				break;
+			}
+		}
+		if (originalIdx == -1) {
+			// Option is already on top
+			return;
+		}
+
+		MenuEntry entry1 = menuEntries[originalIdx];
+		MenuEntry entry2 = menuEntries[topIdx];
+
+		menuEntries[originalIdx] = entry2;
+		menuEntries[topIdx] = entry1;
+		// The swap is done correctly, but the top entry isn't left-clickable
+		menuEntries[originalIdx].setType(MenuAction.CC_OP);
+		menuEntries[topIdx].setType(MenuAction.CC_OP);
+		client.setMenuEntries(menuEntries);
 	}
 
 	@Provides

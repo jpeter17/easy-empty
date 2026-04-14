@@ -27,31 +27,69 @@ package com.easyEmpty;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
+import net.runelite.client.config.ConfigSection;
+
 
 @ConfigGroup("easyempty")
 public interface EasyEmptyConfig extends Config
 {
-    @ConfigItem(keyName = "emptyPouches", name = "Empty pouches near altar", description = "Left-click empty pouches near altar", position = 1)
+    enum ShiftOption {
+        UNMODIFIED,
+        FILL,
+        EMPTY,
+        DYNAMIC
+    }
+
+    @ConfigItem(keyName = "emptyPouches", name = "Empty pouches near altar",
+            description = "Left-click always empties pouches near altar, regardless of essence in inventory", position = 1)
     default boolean emptyPouches()
     {
         return true;
     }
 
-    @ConfigItem(keyName = "bankFill", name = "Fill pouches from bank", description = "Left-click fill pouches from bank menu", position = 2)
+    @ConfigItem(keyName = "bankFill", name = "Fill pouches from bank",
+            description = "Left-click fills pouches from bank menu", position = 2)
     default boolean bankFill()
     {
         return true;
     }
 
-    @ConfigItem(keyName = "swapStam", name = "Stamina Potion(1) swaps", description = "Left-click drink/withdraw-1 from bank menu", position = 3)
+    @ConfigItem(keyName = "swapStam", name = "Stamina Potion(1) swaps",
+            description = "Left-click drink/withdraw-1 from bank menu", position = 3)
     default boolean swapStam()
     {
         return true;
     }
 
-    @ConfigItem(keyName = "swapNeck", name = "Binding Necklace swaps", description = "Left-click wear/withdraw-1 from bank menu", position = 4)
+    @ConfigItem(keyName = "swapNeck", name = "Binding Necklace swaps",
+            description = "Left-click wear/withdraw-1 from bank menu", position = 4)
     default boolean swapNeck()
     {
         return true;
     }
+
+    @ConfigSection(
+            name = "Experimental",
+            description = "Advanced options for modifying essence pouch behavior",
+            position = 5
+    )
+    String experimental = "experimental";
+
+    @ConfigItem(keyName = "emptyPouchesShift", name = "Altar shift-click",
+            description = "Configure shift-click near an altar. Requires left-click setting enabled. Dynamic flips Fill/Empty. Recommended: Fill or Dynamic",
+            section = experimental, position = 1
+    )
+    default ShiftOption emptyPouchesShift() { return ShiftOption.UNMODIFIED; }
+    @ConfigItem(keyName = "fillPouches",
+            name = "Fill pouches away from altar",
+            description = "Left-click always fills pouches when not near altar, regardless of essence in inventory",
+            section = experimental, position = 2
+    )
+    default boolean fillPouches() { return true; }
+
+    @ConfigItem(keyName = "fillPouchesShift", name = "Non-altar shift-click",
+            description = "Configure shift-click when not near an altar. Requires left-click setting enabled. Dynamic flips Fill/Empty. Recommended: Empty or Dynamic",
+            section = experimental, position = 3
+    )
+    default ShiftOption fillPouchesShift() { return ShiftOption.UNMODIFIED; }
 }
