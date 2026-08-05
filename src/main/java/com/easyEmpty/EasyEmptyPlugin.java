@@ -112,6 +112,11 @@ public class EasyEmptyPlugin extends Plugin
 			return;
 		}
 
+		Player p = client.getLocalPlayer();
+		if (p == null) {
+			return;
+		}
+
 		if (client.getWidget(WidgetInfo.BANK_CONTAINER) != null) {
 			MenuEntry[] menuEntries = client.getMenuEntries();
 			for (int i = menuEntries.length - 1; i >= 0; i--) {
@@ -136,7 +141,11 @@ public class EasyEmptyPlugin extends Plugin
 		}
 
 		boolean atAltar = false;
-		WorldPoint playerLoc = client.getLocalPlayer().getWorldLocation();
+
+		WorldPoint playerLoc = p.getWorldLocation();
+		if (playerLoc == null) {
+			return;
+		}
 
 		if (zmi.contains2D(playerLoc)) {
 			atAltar = true;
